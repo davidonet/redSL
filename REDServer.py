@@ -4,6 +4,7 @@
 from liblo import *
 import sys
 import spidev
+import time
 
 class MyServer(ServerThread):
 	def __init__(self):
@@ -32,5 +33,5 @@ except ServerError, err:
 server.start()
 
 while True:
-	sleep(10)
-	
+	time.sleep(10)
+
