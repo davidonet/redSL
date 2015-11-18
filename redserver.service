@@ -1,0 +1,9 @@
+[Unit]
+Description=OSC to SPI gateway
+
+[Service]
+Type=oneshot
+ExecStart=/root/redSL/REDServer.py
+
+[Install]
+WantedBy=multi-user.target
