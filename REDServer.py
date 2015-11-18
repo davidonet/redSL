@@ -30,4 +30,7 @@ except ServerError, err:
 	sys.exit()
 
 server.start()
-raw_input("press enter to quit...\n")
+
+while True:
+	sleep(10)
+	
