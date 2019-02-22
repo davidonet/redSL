@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 from __future__ import division
 
 import time
@@ -8,6 +10,10 @@ import datetime
 import picamera
 import picamera.array
 import numpy as np
+
+import random
+import liblo  
+
 
 class MyMotionDetector(picamera.array.PiMotionAnalysis):
     def __init__(self, camera, handler):
@@ -45,9 +51,26 @@ class CaptureHandler:
         self.detected = False
         self.working = False
         self.i = 0
+        self.target = liblo.Address("127.0.0.1",1234)
+        self.matrix = [0]*512
+        self.frame = 0
 
     def motion_detected(self,val):
-    	print val
+        for p in range(32):
+            mask = 0
+            for f in range(16):
+                if(0<self.matrix[p*16+f]):
+                    mask = ( mask | (1<<f) )
+                    self.matrix[p*16+f] -= 1
+            liblo.send(self.target, "/set",p+1,mask)
+        if(self.frame == 0):
+            morecount = int((128 * val[0])/1000)
+            morepower = int((30*val[2])/1000)
+#           print morecount,morepower
+            for c in range(random.randint(16,16+morecount)):
+                self.matrix[random.randint(0,511)]=(5+morepower)
+        self.frame = (self.frame+1)%10
+
 
 class PiMotion:
     def __init__(self, verbose=False, post_capture_callback=None):
@@ -61,8 +84,8 @@ class PiMotion:
     def start(self):
         with picamera.PiCamera() as camera:
             camera.resolution = (1280, 720)
-            camera.framerate = 8
-
+            camera.framerate = 10
+        
             handler = CaptureHandler(camera, self.post_capture_callback)
 
             self.__print('Waiting 2 seconds for the camera to warm up')
@@ -76,18 +99,21 @@ class PiMotion:
                 )
 
                 while True:
-                    time.sleep(1)
+                    time.sleep(10)
+
             finally:
                 camera.stop_recording()
                 self.__print('Stopped recording')
+                target = liblo.Address("127.0.0.1",1234)
+                liblo.send(target,"/set",0xff,0x00)
 
 def callback(path):
 	print 'Callback'
 
 
-def signal_handler(signal, frame):
-    print 'You pressed Ctrl-C!'
-    sys.exit(0)
+
+ret = 256
+
 
 motion = PiMotion(verbose=True, post_capture_callback=callback)
 motion.start()

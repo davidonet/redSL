@@ -20,7 +20,6 @@ class MyServer(ServerThread):
 	@make_method('/set', 'ii')
 	def foo_callback(self, path, args):
 		a,p = args
-		print "received",a,p
 		self.setPattern(a,p)
 
 

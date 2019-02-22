@@ -1,0 +1,10 @@
+[Unit]
+Description=RED Cam
+
+[Service]
+Type=oneshot
+User=pi
+ExecStart=/home/pi/redServer/REDCam.py
+
+[Install]
+WantedBy=multi-user.target
